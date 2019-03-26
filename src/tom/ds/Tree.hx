@@ -27,6 +27,11 @@ class Node<K, V> {
     }
 }
 
+/**
+ * A red-black tree
+ * 
+ * Self-balancing binary tree
+ */
 abstract Tree<K, V>(TreeData<K, V>) {
     
     /**
@@ -67,8 +72,20 @@ abstract Tree<K, V>(TreeData<K, V>) {
     inline function get_size(): Int
         return this.size();
     
+    /**
+     * Delete the key and associated value
+     * @param key Key to delete from table
+     */
     public inline function delete(key: K): Void
         this.delete(key);
+
+    /**
+     * Delete the keys in range given
+     * @param min Minimum key to delete
+     * @param max Maximum key to delete
+     */
+    public inline function deleteRange(min: K, max: K): Void
+        this.deleteRange(min, max);
     
     
     /**
@@ -79,9 +96,20 @@ abstract Tree<K, V>(TreeData<K, V>) {
     public inline function contains(key: K): Bool
         return this.contains(key);
     
+    /**
+     * [Description]
+     * @param lo 
+     * @param hi 
+     * @return Iterable<K>
+        return this.keys(lo, hi)
+     */
     public inline function keys(?lo: K, ?hi: K): Iterable<K>
         return this.keys(lo, hi);
     
+    /**
+     * Returns an iterator over every key-value pair in the tree
+     * @return the iterator
+     */
     public inline function keyValueIterator(): KeyValueIterator<K, V>
         return this.keyValueIterator();
     
@@ -231,6 +259,12 @@ class TreeData<K, V> {
         
         root = deleteNode(root, key);
         if(!isEmpty()) root.color = BLACK;
+    }
+
+    public function deleteRange(min: K, max: K): Void {
+        var keys = keys(min, max);
+        for(key in keys)
+            delete(key);
     }
 
     function deleteNode(h: Node<K, V>, key: K): Node<K, V> {

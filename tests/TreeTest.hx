@@ -38,6 +38,19 @@ class TreeTest extends Test {
         tree.delete(20);
         Assert.equals(3, tree.size);
     }
+    public function testTreeDelete(): Void {
+        var tree = new Tree<Int, String>((a, b) -> a - b);
+        tree.put(5, "Hello");
+        tree.put(7, "To");
+        tree.put(10, "World");
+        tree.put(15, "Its");
+        tree.put(20, "Dave");
+        Assert.equals(5, tree.size);
+        tree.deleteRange(5, 7);
+        Assert.equals(3, tree.size);
+        tree.deleteRange(15, 20);
+        Assert.equals(1, tree.size);
+    }
     public function testManyTree(): Void {
         var tree = new Tree<Int, String>((a, b) -> a - b);
         Assert.isTrue(tree.isEmpty());
