@@ -1,0 +1,16 @@
+{
+    "name": "tomslib",
+    "url": "https://github.com/TomBebb/tomslib/",
+    "license": "MIT",
+    "tags": [
+        "cross"
+    ],
+    "description": "A set of game-related classes",
+    "version": "1.0.0",
+    "classPath": "src/",
+    "releasenote": "Initial release, everything is working correctly.",
+    "contributors": [
+    ],
+    "dependencies": {
+    }
+}
