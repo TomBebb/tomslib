@@ -255,7 +255,8 @@ class TreeData<K, V> {
                 h.key = x.key;
                 h.value = x.value;
                 h.right = deleteMinNode(h.right);
-            }
+            } else
+                h.right = deleteNode(h.right, key);
         }
         return balance(h);
     }

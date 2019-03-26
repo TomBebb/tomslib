@@ -35,6 +35,8 @@ class TreeTest extends Test {
         Assert.equals(3, tree.size);
         tree.put(20, "Dave");
         Assert.equals(4, tree.size);
+        tree.delete(20);
+        Assert.equals(3, tree.size);
     }
     public function testManyTree(): Void {
         var tree = new Tree<Int, String>((a, b) -> a - b);
@@ -62,6 +64,9 @@ class TreeTest extends Test {
 
         tree[5] = "Goodbye";
         Assert.equals("Goodbye", tree[5]);
+
+        tree.delete(5);
+        Assert.equals(null, tree[5]);
     }
     public function testTreeIter(): Void {
         var tree = new Tree<Int, String>((a, b) -> a - b);
