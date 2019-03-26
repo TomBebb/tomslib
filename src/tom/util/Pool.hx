@@ -1,6 +1,4 @@
-package tom;
-
-import haxe.ds.Vector;
+package tom.util;
 
 @:generic
 class Pool<T: IPoolable> {

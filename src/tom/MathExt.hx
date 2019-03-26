@@ -13,8 +13,19 @@ class MathExt {
 		return (n > 0) ? 1 : (n == 0 ? 0 : -1);
 	}
 	
+	/**
+	 * Clamps the number between a minumum and maximum
+	 * @param n the number
+	 * @param min the minimum
+	 * @param max the maximum
+	 * @return the clamped number
+		return n < min ? min : (n > max ? max : n)
+	 */
+	public static function clamp(n: Float, min: Float, max: Float): Float
+		return n < min ? min : (n > max ? max : n);
+
 	
 	public static inline function clampMag(n:Float, max:Float):Float {
-		return Math.clamp(n, -max, max);
+		return clamp(n, -max, max);
 	}
 }

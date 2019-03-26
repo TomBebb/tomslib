@@ -1,19 +1,17 @@
-import tom.ds.Tree;
+import tom.ds.TreeMap;
 import utest.Assert;
 import utest.Test;
-import haxe.ds.Option;
-using tom.util.OptionUtil;
 
 class TreeTest extends Test {
     public function testEmptyTree(): Void {
-        var tree = new Tree<Int, String>((a, b) -> a - b);
+        var tree = new TreeMap<Int, String>((a, b) -> a - b);
         Assert.isTrue(tree.isEmpty());
         Assert.equals(tree.size, 0);
         Assert.equals(null, tree.max());
         Assert.equals(null, tree.min());
     }
     public function testSingleTree(): Void {
-        var tree = new Tree<Int, String>((a, b) -> a - b);
+        var tree = new TreeMap<Int, String>((a, b) -> a - b);
         tree.put(5, "Hello");
         Assert.isFalse(tree.isEmpty());
         Assert.equals(null, tree[6]);
@@ -25,7 +23,7 @@ class TreeTest extends Test {
         Assert.equals(5, tree.floor(6));
     }
     public function testManyTreeSizes(): Void {
-        var tree = new Tree<Int, String>((a, b) -> a - b);
+        var tree = new TreeMap<Int, String>((a, b) -> a - b);
         Assert.equals(0, tree.size);
         tree.put(5, "Hello");
         Assert.equals(1, tree.size);
@@ -39,7 +37,7 @@ class TreeTest extends Test {
         Assert.equals(3, tree.size);
     }
     public function testTreeDelete(): Void {
-        var tree = new Tree<Int, String>((a, b) -> a - b);
+        var tree = new TreeMap<Int, String>((a, b) -> a - b);
         tree.put(5, "Hello");
         tree.put(7, "To");
         tree.put(10, "World");
@@ -52,7 +50,7 @@ class TreeTest extends Test {
         Assert.equals(1, tree.size);
     }
     public function testManyTree(): Void {
-        var tree = new Tree<Int, String>((a, b) -> a - b);
+        var tree = new TreeMap<Int, String>((a, b) -> a - b);
         Assert.isTrue(tree.isEmpty());
         tree[5] = "Hello";
         tree[10] = "World";
@@ -82,7 +80,7 @@ class TreeTest extends Test {
         Assert.equals(null, tree[5]);
     }
     public function testTreeIter(): Void {
-        var tree = new Tree<Int, String>((a, b) -> a - b);
+        var tree = new TreeMap<Int, String>((a, b) -> a - b);
         tree.put(5, "Hello");
         tree.put(10, "World");
         tree.put(15, "Its");

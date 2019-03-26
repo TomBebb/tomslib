@@ -1,6 +1,7 @@
-package col;
+package tom.geom;
 
-import common.Pool;
+import tom.Pool;
+import tom.geom.Rect;
 
 interface IQuadTreeMember {
 	var bounds(default, null): Rect;

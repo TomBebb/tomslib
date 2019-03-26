@@ -11,11 +11,11 @@ using tom.util.OptionUtil;
     var BLACK = false;
 }
 @:generic
-class Node<K, V> {
+class TreeNode<K, V> {
     public var key: K;
     public var value: V;
-    public var left: Node<K, V>;
-    public var right: Node<K, V>;
+    public var left: TreeNode<K, V>;
+    public var right: TreeNode<K, V>;
     public var color: TreeColor;
     public var size: Int;
 
@@ -32,7 +32,7 @@ class Node<K, V> {
  * 
  * Self-balancing binary tree
  */
-abstract Tree<K, V>(TreeData<K, V>) {
+abstract TreeMap<K, V>(TreeMapData<K, V>) {
     
     /**
      * The number of key-value pairs in this table
@@ -43,7 +43,7 @@ abstract Tree<K, V>(TreeData<K, V>) {
      * @param keyCompare The key comparison function
      */
     public inline function new(keyCompare: K -> K -> Int) {
-        this = new TreeData<K, V>(keyCompare);
+        this = new TreeMapData<K, V>(keyCompare);
     }
     /**
      * Is this table empty?
@@ -137,8 +137,8 @@ abstract Tree<K, V>(TreeData<K, V>) {
 }
 
 @:generic
-class TreeData<K, V> {
-    var root: Node<K, V>;
+class TreeMapData<K, V> {
+    var root: TreeNode<K, V>;
     var keyCompare: K -> K -> Int;
     public inline function new(keyCompare: K -> K -> Int) {
         this.keyCompare = keyCompare;
@@ -163,7 +163,7 @@ class TreeData<K, V> {
         return value;
     }
 
-    function getNode(key: K): Node<K, V> {
+    function getNode(key: K): TreeNode<K, V> {
         var node = root;
         while(node != null) {
             var cmp = keyCompare(key, node.key);
@@ -174,7 +174,7 @@ class TreeData<K, V> {
         return node;
     }
 
-    inline function isRed(x: Node<K, V>): Bool
+    inline function isRed(x: TreeNode<K, V>): Bool
         return x == null ? false : x.color == RED;
 
     public inline function contains(key: K): Bool
@@ -185,9 +185,9 @@ class TreeData<K, V> {
         root.color = BLACK;
     }
 
-    function putNode(h: Node<K, V>, key: K, val: V): Node<K, V> {
+    function putNode(h: TreeNode<K, V>, key: K, val: V): TreeNode<K, V> {
         if(h == null)
-            return new Node(key, val, RED, 1);
+            return new TreeNode(key, val, RED, 1);
         
         var cmp = keyCompare(key, h.key);
         if(cmp < 0) h.left = putNode(h.left, key, val);
@@ -219,7 +219,7 @@ class TreeData<K, V> {
         if(!isEmpty()) root.color = BLACK;
     }
 
-    function deleteMinNode(h: Node<K, V>): Node<K, V> {
+    function deleteMinNode(h: TreeNode<K, V>): TreeNode<K, V> {
         if(h.left == null)
             return null;
         
@@ -240,7 +240,7 @@ class TreeData<K, V> {
         root = deleteMaxNode(root);
         if(!isEmpty()) root.color = BLACK;
     }
-    function deleteMaxNode(h: Node<K, V>): Node<K, V> {
+    function deleteMaxNode(h: TreeNode<K, V>): TreeNode<K, V> {
         if(h.right == null)
             return null;
         
@@ -267,7 +267,7 @@ class TreeData<K, V> {
             delete(key);
     }
 
-    function deleteNode(h: Node<K, V>, key: K): Node<K, V> {
+    function deleteNode(h: TreeNode<K, V>, key: K): TreeNode<K, V> {
         var cmp = keyCompare(key, h.key);
         if(cmp < 0) {
             if(!isRed(h.left) && !isRed(h.left.left)) 
@@ -294,13 +294,13 @@ class TreeData<K, V> {
         }
         return balance(h);
     }
-    inline function nodeSize(h: Node<K, V>):Int
+    inline function nodeSize(h: TreeNode<K, V>):Int
         return h == null ? 0 : h.size;
     
     // helper functions
 
     // make left-leaning link lean to right
-    function rotateRight(h: Node<K, V>): Node<K, V> {
+    function rotateRight(h: TreeNode<K, V>): TreeNode<K, V> {
         var x = h.left;
         h.left = x.right;
         x.right = h;
@@ -311,7 +311,7 @@ class TreeData<K, V> {
         return x;
     }
     // make right-leaning link lean to left
-    function rotateLeft(h: Node<K, V>): Node<K, V> {
+    function rotateLeft(h: TreeNode<K, V>): TreeNode<K, V> {
         var x = h.right;
         h.right = x.left;
         x.left = h;
@@ -321,12 +321,12 @@ class TreeData<K, V> {
         h.size = nodeSize(h.left) + nodeSize(h.right) + 1;
         return x;
     }
-    function flipColors(h: Node<K, V>): Void {
+    function flipColors(h: TreeNode<K, V>): Void {
         h.color = !h.color;
         h.left.color = !h.left.color;
         h.right.color = !h.right.color;
     }
-    function moveRedLeft(h: Node<K, V>): Node<K, V> {
+    function moveRedLeft(h: TreeNode<K, V>): TreeNode<K, V> {
         flipColors(h);
         if(isRed(h.right.left)) {
             h.right = rotateRight(h.right);
@@ -335,7 +335,7 @@ class TreeData<K, V> {
         }
         return h;
     }
-    function moveRedRight(h: Node<K, V>): Node<K, V> {
+    function moveRedRight(h: TreeNode<K, V>): TreeNode<K, V> {
         flipColors(h);
         if(isRed(h.left.left)) {
             h = rotateRight(h);
@@ -343,7 +343,7 @@ class TreeData<K, V> {
         }
         return h;
     }
-    function balance(h: Node<K, V>): Node<K, V> {
+    function balance(h: TreeNode<K, V>): TreeNode<K, V> {
         if(isRed(h.right)) h = rotateLeft(h);
         if(isRed(h.left) && isRed(h.left.left)) h = rotateRight(h);
         if(isRed(h.left) && isRed(h.right)) flipColors(h);
@@ -360,7 +360,7 @@ class TreeData<K, V> {
         return isEmpty() ? null : minNode(root).key;
     
     // get smallest key in table
-    public function minNode(x: Node<K, V>): Node<K, V>
+    public function minNode(x: TreeNode<K, V>): TreeNode<K, V>
         return x.left == null ? x : minNode(x.left);
     /**
      * Returns the largest key in the table
@@ -369,7 +369,7 @@ class TreeData<K, V> {
         return isEmpty() ? null : maxNode(root).key;
     
     // get largest key in table
-    public function maxNode(x: Node<K, V>): Node<K, V>
+    public function maxNode(x: TreeNode<K, V>): TreeNode<K, V>
         return x.right == null ? x : maxNode(x.right);
     
     public inline function floor(key: K): K {
@@ -393,7 +393,7 @@ class TreeData<K, V> {
         var clDiff = Math.abs(keyCompare(key, cl));
         return flDiff < clDiff ? fl : cl;
     }
-    function floorNode(x: Node<K, V>, key: K): Node<K, V> {
+    function floorNode(x: TreeNode<K, V>, key: K): TreeNode<K, V> {
         if(x == null)
             return null;
         var cmp = keyCompare(key, x.key);
@@ -406,7 +406,7 @@ class TreeData<K, V> {
             t != null ? t : x;
         };
     }
-    function ceilingNode(x: Node<K, V>, key: K): Node<K, V> {
+    function ceilingNode(x: TreeNode<K, V>, key: K): TreeNode<K, V> {
         if(x == null)
             return null;
         var cmp = keyCompare(key, x.key);
@@ -430,7 +430,7 @@ class TreeData<K, V> {
         keysNodesQueue(root, queue, lo, hi);
         return cast queue;
     }
-    function keysNodesQueue(x: Node<K, V>, queue: Queue<K>, lo: K, hi: K): Void {
+    function keysNodesQueue(x: TreeNode<K, V>, queue: Queue<K>, lo: K, hi: K): Void {
         if(x == null) return;
         var cmpLo = keyCompare(lo, x.key);
         var cmpHi = keyCompare(hi, x.key);
