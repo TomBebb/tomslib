@@ -1,6 +1,6 @@
 package tom.geom;
 
-import tom.Pool;
+import tom.util.Pool;
 import tom.geom.Rect;
 
 interface IQuadTreeMember {
@@ -56,7 +56,6 @@ class QuadTree<T: IQuadTreeMember> implements IPoolable {
 
     public function add(object: T): Bool {
         if(!bounds.contains(object.bounds)) {
-            trace('Object ${object.bounds} not in quad tree bounds ${object}');
             return false;
         }
         if(level < MAX_LEVEL && (topLeft != null || objects.length >= MAX_OBJECTS)) {
@@ -74,7 +73,6 @@ class QuadTree<T: IQuadTreeMember> implements IPoolable {
         }
 
         objects.push(object);
-        trace('${object} bounds ${object.bounds} added to quad tree ${this}');
         return true;
     }
 

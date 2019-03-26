@@ -1,5 +1,6 @@
 package tom.ds;
 
+import tom.util.Pool;
 import tom.ds.Queue;
 import haxe.ds.Option;
 
@@ -11,7 +12,7 @@ using tom.util.OptionUtil;
     var BLACK = false;
 }
 @:generic
-class TreeNode<K, V> {
+class TreeNode<K, V> implements IPoolable {
     public var key: K;
     public var value: V;
     public var left: TreeNode<K, V>;
@@ -19,11 +20,35 @@ class TreeNode<K, V> {
     public var color: TreeColor;
     public var size: Int;
 
-    public function new(key: K, val: V, color: TreeColor, size: Int) {
+    var pool: Pool<TreeNode<K, V>>;
+
+    public inline function new(pool: Pool<TreeNode<K, V>>, key: K, val: V, color: TreeColor, size: Int) {
+        set(key, val, color, size);
+        this.pool = pool;
+    }
+    public function set(key: K, val: V, color: TreeColor, size: Int): TreeNode<K, V> {
         this.key = key;
         this.value = val;
         this.color = color;
         this.size = size;
+        return this;
+    }
+
+    public function reset() {
+        if(left != null) {
+            left.put();
+            left = null;
+        }
+        if(right != null) {
+            right.put();
+            right = null;
+        }
+        key = null;
+        size = 0;
+    }
+
+    public inline function put(): Void {
+        pool.put(this);
     }
 }
 
@@ -42,8 +67,8 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) {
      * Create a new tree map
      * @param keyCompare The key comparison function
      */
-    public inline function new(keyCompare: K -> K -> Int) {
-        this = new TreeMapData<K, V>(keyCompare);
+    public inline function new(keyCompare: K -> K -> Int, defaultKey: K, defaultValue: V) {
+        this = new TreeMapData<K, V>(keyCompare, defaultKey, defaultValue);
     }
     /**
      * Is this table empty?
@@ -140,8 +165,10 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) {
 class TreeMapData<K, V> {
     var root: TreeNode<K, V>;
     var keyCompare: K -> K -> Int;
-    public inline function new(keyCompare: K -> K -> Int) {
+    var pool: Pool<TreeNode<K, V>>;
+    public inline function new(keyCompare: K -> K -> Int, defaultKey: K, defaultValue: V) {
         this.keyCompare = keyCompare;
+        pool = new Pool(() -> new TreeNode(pool, null, null, TreeColor.BLACK, 0));
     }
 
     public inline function size(): Int
@@ -187,7 +214,7 @@ class TreeMapData<K, V> {
 
     function putNode(h: TreeNode<K, V>, key: K, val: V): TreeNode<K, V> {
         if(h == null)
-            return new TreeNode(key, val, RED, 1);
+            return pool.get().set(key, val, RED, 1);
         
         var cmp = keyCompare(key, h.key);
         if(cmp < 0) h.left = putNode(h.left, key, val);
@@ -220,8 +247,10 @@ class TreeMapData<K, V> {
     }
 
     function deleteMinNode(h: TreeNode<K, V>): TreeNode<K, V> {
-        if(h.left == null)
+        if(h.left == null) {
+            h.put();
             return null;
+        }
         
         if(!isRed(h.left) && !isRed(h.left.left))
             h = moveRedLeft(h);
@@ -241,8 +270,10 @@ class TreeMapData<K, V> {
         if(!isEmpty()) root.color = BLACK;
     }
     function deleteMaxNode(h: TreeNode<K, V>): TreeNode<K, V> {
-        if(h.right == null)
+        if(h.right == null) {
+            h.put();
             return null;
+        }
         
         if(!isRed(h.right) && !isRed(h.right.left))
             h = moveRedRight(h);
