@@ -4,7 +4,7 @@ import tom.util.Pool;
 import tom.geom.Rect;
 
 interface IQuadTreeMember {
-	var bounds(default, null): Rect;
+	var bounds(get, null): Rect;
 }
 
 class QuadTree<T: IQuadTreeMember> implements IPoolable {
@@ -143,12 +143,7 @@ class QuadTree<T: IQuadTreeMember> implements IPoolable {
 			bottomLeft.remove(obj);
     }
 
-    public function reset(): Void {
-        level = 0;
-        if(bounds != null)
-            bounds.put();
-        bounds = null;
-
+    public function clear(): Void {
         // put inner quads in pool
         if(topLeft == null)
             return;
@@ -160,6 +155,14 @@ class QuadTree<T: IQuadTreeMember> implements IPoolable {
 
 
         topLeft = topRight = bottomLeft = bottomRight = null;
+    }
+
+    public function reset(): Void {
+        level = 0;
+        if(bounds != null)
+            bounds.put();
+        bounds = null;
+        clear();
     }
 
     public inline function put(): Void {

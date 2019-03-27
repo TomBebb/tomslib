@@ -53,6 +53,8 @@ class TreeTest extends Test {
         Assert.equals(3, tree.size);
         tree.deleteRange(15, 20);
         Assert.equals(1, tree.size);
+        tree.delete(10);
+        Assert.equals(0, tree.size);
     }
     public function testManyTree(): Void {
         var tree = emptyTree.clone();
@@ -81,8 +83,10 @@ class TreeTest extends Test {
         tree[5] = "Goodbye";
         Assert.equals("Goodbye", tree[5]);
 
+        Assert.equals(4, tree.size);
         tree.delete(5);
-        Assert.equals(null, tree[5]);
+        Assert.isNull(tree[5]);
+        Assert.equals(3, tree.size);
     }
     public function testTreeIter(): Void {
         var tree = emptyTree.clone();

@@ -8,7 +8,8 @@ class Main {
             new RectTest(),
             new TreeTest(),
             new PoolTest(),
-            new MathTest()
+            new MathTest(),
+            new QuadTreeTest()
         ]);
 	}
 }
