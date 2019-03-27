@@ -1,8 +1,34 @@
 using tom.util.IteratorUtil;
+import tom.util.Comparator;
 import utest.Assert;
 import utest.Test;
 
 class IterTest extends Test {
+    public function testSort() {
+        var arr = [1, -2, 32, 23, 3];
+        var sorted = arr.iterator().sort(Comparator.INT);
+        var i = 0;
+        for(elem in sorted) {
+            switch(elem) {
+                case 0: Assert.equals(-2, elem); break;
+                case 1: Assert.equals(1, elem); break;
+                case 2: Assert.equals(3, elem); break;
+                case 3: Assert.equals(23, elem); break;
+                case 4: Assert.equals(32, elem); break;
+            }
+            i++;
+        }
+    }
+    public function testMin() {
+        var arr = [1, -2, 32, 23, 3];
+        Assert.equals(-2, arr.iterator().min(Comparator.INT));
+        Assert.equals(null, new Array<Int>().iterator().min(Comparator.INT));
+    }
+    public function testMax() {
+        var arr = [1, -2, 32, 23, 3];
+        Assert.equals(32, arr.iterator().max(Comparator.INT));
+        Assert.equals(null, new Array<Int>().iterator().max(Comparator.INT));
+    }
     public function testFirstLast() {
         Assert.isNull(new Array<Int>().iterator().first());
         Assert.isNull(new Array<Int>().iterator().last());

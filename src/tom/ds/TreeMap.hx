@@ -1,5 +1,6 @@
 package tom.ds;
 
+import tom.util.Comparator;
 import tom.util.Pool;
 import tom.ds.Queue;
 import haxe.ds.Option;
@@ -22,7 +23,7 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) from TreeMapData<K, V> {
      * Create a new tree map
      * @param keyCompare The key comparison function
      */
-    public inline function new(keyCompare: K -> K -> Int, defaultKey: K, defaultValue: V) {
+    public inline function new(keyCompare: Comparator<K>, defaultKey: K, defaultValue: V) {
         this = new TreeMapData<K, V>(keyCompare, defaultKey, defaultValue);
     }
     /**
@@ -130,11 +131,11 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) from TreeMapData<K, V> {
 @:generic
 private class TreeMapData<K, V> {
     var root: TreeNode<K, V>;
-    var keyCompare: K -> K -> Int;
+    var keyCompare: Comparator<K>;
     var pool: Pool<TreeNode<K, V>>;
-    public inline function new(keyCompare: K -> K -> Int, ?defaultKey: K, ?defaultValue: V) {
+    public  function new(keyCompare: Comparator<K>, ?defaultKey: K, ?defaultValue: V) {
         this.keyCompare = keyCompare;
-        pool = new Pool(() -> new TreeNode(pool, null, null, TreeColor.BLACK, 0));
+        pool = new Pool(() -> new TreeNode(pool, defaultKey, defaultValue, TreeColor.BLACK, 0));
     }
 
     public function clone(): TreeMapData<K, V> {
@@ -167,7 +168,7 @@ private class TreeMapData<K, V> {
     function getNode(key: K): TreeNode<K, V> {
         var node = root;
         while(node != null) {
-            var cmp = keyCompare(key, node.key);
+            var cmp = keyCompare.compare(key, node.key);
             if(cmp < 0) node = node.left;
             else if(cmp > 0) node = node.right;
             else break;
@@ -190,7 +191,7 @@ private class TreeMapData<K, V> {
         if(h == null)
             return pool.get().set(key, val, RED, 1);
         
-        var cmp = keyCompare(key, h.key);
+        var cmp = keyCompare.compare(key, h.key);
         if(cmp < 0) h.left = putNode(h.left, key, val);
         else if(cmp > 0) h.right = putNode(h.right, key, val);
         else h.value = val;
@@ -273,7 +274,7 @@ private class TreeMapData<K, V> {
     }
 
     function deleteNode(h: TreeNode<K, V>, key: K): TreeNode<K, V> {
-        var cmp = keyCompare(key, h.key);
+        var cmp = keyCompare.compare(key, h.key);
         if(cmp < 0) {
             if(!isRed(h.left) && !isRed(h.left.left)) 
                 h = moveRedLeft(h);
@@ -281,13 +282,13 @@ private class TreeMapData<K, V> {
         } else {
             if(isRed(h.left)) {
                 h = rotateRight(h);
-                cmp = keyCompare(key, h.key);
+                cmp = keyCompare.compare(key, h.key);
             }
             if(cmp == 0 && h.right == null)
                 return null;
             if(!isRed(h.right) && !isRed(h.right)) {
                 h = moveRedRight(h);
-                cmp = keyCompare(key, h.key);
+                cmp = keyCompare.compare(key, h.key);
             }
             if(cmp == 0) {
                 var x = minNode(h.right);
@@ -394,14 +395,14 @@ private class TreeMapData<K, V> {
         if(cl == null)
             return fl;
             
-        var flDiff = Math.abs(keyCompare(key, fl));
-        var clDiff = Math.abs(keyCompare(key, cl));
+        var flDiff = Math.abs(keyCompare.compare(key, fl));
+        var clDiff = Math.abs(keyCompare.compare(key, cl));
         return flDiff < clDiff ? fl : cl;
     }
     function floorNode(x: TreeNode<K, V>, key: K): TreeNode<K, V> {
         if(x == null)
             return null;
-        var cmp = keyCompare(key, x.key);
+        var cmp = keyCompare.compare(key, x.key);
         return if(cmp == 0)
             x;
         else if(cmp < 0)
@@ -414,7 +415,7 @@ private class TreeMapData<K, V> {
     function ceilingNode(x: TreeNode<K, V>, key: K): TreeNode<K, V> {
         if(x == null)
             return null;
-        var cmp = keyCompare(key, x.key);
+        var cmp = keyCompare.compare(key, x.key);
         return if(cmp == 0)
             x;
         else if(cmp > 0)
@@ -437,8 +438,8 @@ private class TreeMapData<K, V> {
     }
     function keysNodesQueue(x: TreeNode<K, V>, queue: Queue<K>, lo: K, hi: K): Void {
         if(x == null) return;
-        var cmpLo = keyCompare(lo, x.key);
-        var cmpHi = keyCompare(hi, x.key);
+        var cmpLo = keyCompare.compare(lo, x.key);
+        var cmpHi = keyCompare.compare(hi, x.key);
 
         if(cmpLo < 0) keysNodesQueue(x.left, queue, lo, hi);
         if(cmpLo <= 0  && cmpHi >= 0) queue.push(x.key);

@@ -3,7 +3,7 @@ package tom.util;
 import haxe.ds.List;
 
 @:generic
-class FilterIter<T> {
+private class FilterIter<T> {
     var iter: Iterator<T>;
     var pred: T -> Bool;
     var curr: T;
@@ -22,8 +22,8 @@ class FilterIter<T> {
     public inline function next(): T
         return curr;
 }
-
-class MapIter<T, V> {
+@:generic
+private class MapIter<T, V> {
     var iter: Iterator<T>;
     var map: T -> V;
 
@@ -38,7 +38,32 @@ class MapIter<T, V> {
         return map(iter.next());
 }
 
+@:generic class PeekIter<T> {
+    var iter: Iterator<T>;
+    var peek: Null<T>;
+
+    public inline function new(iter: Iterator<T>)
+        this.iter = iter;
+    
+    public inline function hasNext(): Bool
+        return iter.hasNext() || peek != null;
+    
+    public inline function peek(): Null<T> {
+        if(peek == null)
+            peek = hasNext() ? next() : null;
+        peek;
+    }
+    public inline function next(): V
+        peek == null ? next() : peek;
+}
+
 class IteratorUtil {
+    @:generic
+    public static inline function sort<T>(iter: Iterator<T>, cmp: Comparator<T>): Iterator<T> {
+        var arr = toArray(iter);
+        arr.sort(cast cmp);
+        return arr.iterator();
+    }
     public static inline function filter<T>(iter: Iterator<T>, pred: T -> Bool): Iterator<T>
         return new FilterIter<T>(iter, pred);
     @:generic
@@ -66,6 +91,26 @@ class IteratorUtil {
                 return true;
         return false;
     }
+
+    @:generic
+    public static function max<T>(iter: Iterator<T>, cmp: Comparator<T>): Null<T> {
+        var max: Null<T> = null;
+        for(elem in iter) {
+            if(max == null || cmp.isGreaterThan(elem, max))
+                max = elem;
+        }
+        return max;
+    }
+    @:generic
+    public static function min<T>(iter: Iterator<T>, cmp: Comparator<T>): Null<T> {
+        var min: Null<T> = null;
+        for(elem in iter) {
+            if(min == null || cmp.isLessThan(elem, min))
+                min = elem;
+        }
+        return min;
+    }
+
     @:generic
     public static inline function first<T>(iter: Iterator<T>): Null<T>
         return iter.hasNext() ? iter.next() : null;

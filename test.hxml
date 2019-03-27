@@ -4,3 +4,10 @@
 -main Main
 -neko test.n
 -cmd neko test.n
+--next
+-lib utest
+-cp tests
+-cp src
+-main BaseMain
+-js test.js
+-dce full

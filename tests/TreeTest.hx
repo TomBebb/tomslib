@@ -1,11 +1,13 @@
 import tom.ds.TreeMap;
+import tom.util.Comparator;
 import utest.Assert;
 import utest.Test;
 
 class TreeTest extends Test {
     var emptyTree: TreeMap<Int, String>;
     public function setup() {
-        emptyTree = new TreeMap<Int, String>((a, b) -> a - b, 0, "");
+        var cmp = (a, b) -> a - b;
+        emptyTree = new TreeMap<Int, String>(Comparator.INT, 0, "");
     }
     public function testEmptyTree(): Void {
         Assert.isTrue(emptyTree.isEmpty());
