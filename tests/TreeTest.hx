@@ -108,5 +108,25 @@ class TreeTest extends Test {
         Assert.equals("Its", treeVals.next());
         Assert.equals("Dave", treeVals.next());
         Assert.isFalse(treeVals.hasNext());
+
+        var treeRangedVals = tree.iterator(10, 20);
+        Assert.isTrue(treeRangedVals.hasNext());
+        Assert.equals("World", treeRangedVals.next());
+        Assert.equals("Its", treeRangedVals.next());
+        Assert.equals("Dave", treeRangedVals.next());
+        Assert.isFalse(treeRangedVals.hasNext());
+
+        for(key => value in tree.keyValueIterator(15, 20)) {
+            Assert.isTrue(key == 15 || key == 20);
+            switch(key) {
+                case 15:
+                    Assert.equals("Its", value);
+                    break;
+                case 20:
+                    Assert.equals("Dave", value);
+                    break;
+                default:
+            }
+        }
     }
 }

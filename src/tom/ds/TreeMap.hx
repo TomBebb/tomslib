@@ -7,62 +7,6 @@ import haxe.ds.Option;
 import haxe.io.Int32Array.Int32ArrayData;
 using tom.util.OptionUtil;
 
-@:enum abstract TreeColor(Bool) from Bool to Bool {
-    var RED = true;
-    var BLACK = false;
-}
-@:generic
-class TreeNode<K, V> implements IPoolable {
-    public var key: K;
-    public var value: V;
-    public var left: TreeNode<K, V>;
-    public var right: TreeNode<K, V>;
-    public var color: TreeColor;
-    public var size: Int;
-
-    var pool: Pool<TreeNode<K, V>>;
-
-    public inline function new(pool: Pool<TreeNode<K, V>>, key: K, val: V, color: TreeColor, size: Int) {
-        set(key, val, color, size);
-        this.pool = pool;
-    }
-    public function set(key: K, val: V, color: TreeColor, size: Int): TreeNode<K, V> {
-        this.key = key;
-        this.value = val;
-        this.color = color;
-        this.size = size;
-        return this;
-    }
-
-    public function reset() {
-        if(left != null) {
-            left.put();
-            left = null;
-        }
-        if(right != null) {
-            right.put();
-            right = null;
-        }
-        key = null;
-        size = 0;
-    }
-
-    public inline function put(): Void {
-        pool.put(this);
-    }
-
-    public function clone(): TreeNode<K, V> {
-        var cloned = pool.get();
-        cloned.set(key, value, color, size);
-        cloned.pool = pool;
-        if(left != null)
-            cloned.left = left.clone();
-        if(right != null)
-            cloned.right = right.clone();
-        return cloned;
-    }
-}
-
 /**
  * A red-black tree
  * 
@@ -132,17 +76,30 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) from TreeMapData<K, V> {
     public inline function contains(key: K): Bool
         return this.contains(key);
     
+    /**
+     * Get the keys in the range given
+     * @param lo the minimum key, `null` for no min
+     * @param hi the maximum key, `null` for no max
+     * @return iterator over keys
+     */
     public inline function keys(?lo: K, ?hi: K): Iterator<K>
         return this.keys(lo, hi);
     
-    public inline function iterator(): Iterator<V>
-        return this.iterator();
+    
+    /**
+     * Get the values whose keys are in the range given
+     * @param lo the minimum key, `null` for no min
+     * @param hi the maximum key, `null` for no max
+     * @return iterator over values
+     */
+    public inline function iterator(?lo: K, ?hi: K): Iterator<V>
+        return this.iterator(lo, hi);
     /**
      * Returns an iterator over every key-value pair in the tree
      * @return the iterator
      */
-    public inline function keyValueIterator(): KeyValueIterator<K, V>
-        return this.keyValueIterator();
+    public inline function keyValueIterator(?lo: K, ?hi: K): KeyValueIterator<K, V>
+        return this.keyValueIterator(lo, hi);
     
     
     /**
@@ -171,7 +128,7 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) from TreeMapData<K, V> {
 }
 
 @:generic
-class TreeMapData<K, V> {
+private class TreeMapData<K, V> {
     var root: TreeNode<K, V>;
     var keyCompare: K -> K -> Int;
     var pool: Pool<TreeNode<K, V>>;
@@ -487,8 +444,8 @@ class TreeMapData<K, V> {
         if(cmpLo <= 0  && cmpHi >= 0) queue.push(x.key);
         if(cmpHi > 0) keysNodesQueue(x.right, queue, lo, hi);
     }
-    public function iterator(): Iterator<V> {
-        var keys = keys();
+    public function iterator(?lo: K, ?hi: K): Iterator<V> {
+        var keys = keys(lo, hi);
         return {
             hasNext: () -> keys.hasNext(),
             next: () -> {
@@ -497,8 +454,8 @@ class TreeMapData<K, V> {
             }
         };
     }
-    public function keyValueIterator(): KeyValueIterator<K, V> {
-        var keys = keys();
+    public function keyValueIterator(?lo: K, ?hi: K): KeyValueIterator<K, V> {
+        var keys = keys(lo, hi);
         return {
             hasNext: () -> keys.hasNext(),
             next: () -> {
@@ -506,5 +463,62 @@ class TreeMapData<K, V> {
                 {key: key, value: get(key)}
             }
         };
+    }
+}
+
+
+@:enum private abstract TreeColor(Bool) from Bool to Bool {
+    var RED = true;
+    var BLACK = false;
+}
+@:generic
+private class TreeNode<K, V> implements IPoolable {
+    public var key: K;
+    public var value: V;
+    public var left: TreeNode<K, V>;
+    public var right: TreeNode<K, V>;
+    public var color: TreeColor;
+    public var size: Int;
+
+    var pool: Pool<TreeNode<K, V>>;
+
+    public inline function new(pool: Pool<TreeNode<K, V>>, key: K, val: V, color: TreeColor, size: Int) {
+        set(key, val, color, size);
+        this.pool = pool;
+    }
+    public function set(key: K, val: V, color: TreeColor, size: Int): TreeNode<K, V> {
+        this.key = key;
+        this.value = val;
+        this.color = color;
+        this.size = size;
+        return this;
+    }
+
+    public function reset() {
+        if(left != null) {
+            left.put();
+            left = null;
+        }
+        if(right != null) {
+            right.put();
+            right = null;
+        }
+        key = null;
+        size = 0;
+    }
+
+    public inline function put(): Void {
+        pool.put(this);
+    }
+
+    public function clone(): TreeNode<K, V> {
+        var cloned = pool.get();
+        cloned.set(key, value, color, size);
+        cloned.pool = pool;
+        if(left != null)
+            cloned.left = left.clone();
+        if(right != null)
+            cloned.right = right.clone();
+        return cloned;
     }
 }

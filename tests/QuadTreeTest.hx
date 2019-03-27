@@ -62,9 +62,14 @@ class QuadTreeTest extends Test {
         Assert.equals(1, col.length);
         Assert.isTrue(col[0].equals(other));
 
-        other.x = 100.1;
+        other.x = 100;
         col.clear();
         col = tree.getColliding(other, col);
         Assert.equals(0, col.length);
+
+        other.set(99.9, 99.9);
+        col.clear();
+        col = tree.getColliding(other, col);
+        Assert.equals(1, col.length);
     }
 }
