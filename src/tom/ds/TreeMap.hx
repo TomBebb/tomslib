@@ -50,6 +50,17 @@ class TreeNode<K, V> implements IPoolable {
     public inline function put(): Void {
         pool.put(this);
     }
+
+    public function clone(): TreeNode<K, V> {
+        var cloned = pool.get();
+        cloned.set(key, value, color, size);
+        cloned.pool = pool;
+        if(left != null)
+            cloned.left = left.clone();
+        if(right != null)
+            cloned.right = right.clone();
+        return cloned;
+    }
 }
 
 /**
@@ -57,7 +68,7 @@ class TreeNode<K, V> implements IPoolable {
  * 
  * Self-balancing binary tree
  */
-abstract TreeMap<K, V>(TreeMapData<K, V>) {
+abstract TreeMap<K, V>(TreeMapData<K, V>) from TreeMapData<K, V> {
     
     /**
      * The number of key-value pairs in this table
@@ -121,16 +132,11 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) {
     public inline function contains(key: K): Bool
         return this.contains(key);
     
-    /**
-     * [Description]
-     * @param lo 
-     * @param hi 
-     * @return Iterable<K>
-        return this.keys(lo, hi)
-     */
-    public inline function keys(?lo: K, ?hi: K): Iterable<K>
+    public inline function keys(?lo: K, ?hi: K): Iterator<K>
         return this.keys(lo, hi);
     
+    public inline function iterator(): Iterator<V>
+        return this.iterator();
     /**
      * Returns an iterator over every key-value pair in the tree
      * @return the iterator
@@ -159,6 +165,9 @@ abstract TreeMap<K, V>(TreeMapData<K, V>) {
      */
     public inline function nearest(value: K): Null<K>
         return this.nearest(value);
+    
+    public inline function clone(): TreeMap<K, V>
+        return this.clone();
 }
 
 @:generic
@@ -166,9 +175,17 @@ class TreeMapData<K, V> {
     var root: TreeNode<K, V>;
     var keyCompare: K -> K -> Int;
     var pool: Pool<TreeNode<K, V>>;
-    public inline function new(keyCompare: K -> K -> Int, defaultKey: K, defaultValue: V) {
+    public inline function new(keyCompare: K -> K -> Int, ?defaultKey: K, ?defaultValue: V) {
         this.keyCompare = keyCompare;
         pool = new Pool(() -> new TreeNode(pool, null, null, TreeColor.BLACK, 0));
+    }
+
+    public function clone(): TreeMapData<K, V> {
+        var cloned = new TreeMapData(keyCompare, null, null);
+        cloned.pool = pool;
+        if(root != null)
+            cloned.root = root.clone();
+        return cloned;
     }
 
     public inline function size(): Int
@@ -450,16 +467,16 @@ class TreeMapData<K, V> {
             t != null ? t : x;
         }
     }
-    public function keys(?lo: K, ?hi: K): Iterable<K> {
+    public function keys(?lo: K, ?hi: K): Iterator<K> {
         if(isEmpty())
-            return cast new Queue<K>();
+            return [].iterator();
         if(lo == null)
             lo = minNode(root).key;
         if(hi == null)
             hi = maxNode(root).key;
         var queue = new Queue<K>();
         keysNodesQueue(root, queue, lo, hi);
-        return cast queue;
+        return queue.iterator();
     }
     function keysNodesQueue(x: TreeNode<K, V>, queue: Queue<K>, lo: K, hi: K): Void {
         if(x == null) return;
@@ -470,14 +487,24 @@ class TreeMapData<K, V> {
         if(cmpLo <= 0  && cmpHi >= 0) queue.push(x.key);
         if(cmpHi > 0) keysNodesQueue(x.right, queue, lo, hi);
     }
+    public function iterator(): Iterator<V> {
+        var keys = keys();
+        return {
+            hasNext: () -> keys.hasNext(),
+            next: () -> {
+                var key = keys.next();
+                get(key);
+            }
+        };
+    }
     public function keyValueIterator(): KeyValueIterator<K, V> {
-        var keys = keys().iterator();
+        var keys = keys();
         return {
             hasNext: () -> keys.hasNext(),
             next: () -> {
                 var key = keys.next();
                 {key: key, value: get(key)}
             }
-        }
+        };
     }
 }
