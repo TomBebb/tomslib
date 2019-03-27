@@ -9,7 +9,8 @@ class Main {
             new TreeTest(),
             new PoolTest(),
             new MathTest(),
-            new QuadTreeTest()
+            new QuadTreeTest(),
+            new IterTest()
         ]);
 	}
 }

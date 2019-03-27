@@ -93,10 +93,18 @@ class Rect implements IPoolable {
 	public inline function centreY():Float
 		return y + height / 2;
 	
+	/**
+	 * Restore the rectangle to its defaults.
+	 */
 	public inline function reset(): Void {
 		x = y = width = height = 0;
 	}
 
+	/**
+	 * Returns `true` when this rectangle overlaps / intersects with `other`
+	 * @param other rectangle to check
+	 * @return `true` when intersects
+	 */
 	public function intersects(other: Rect): Bool {
 		return (right > other.left) &&
 			(left < other.right) && 
@@ -104,11 +112,22 @@ class Rect implements IPoolable {
 			(top < other.bottom);
 	}
 
+	/**
+	 * Returns true when `other` is inside this rectangle
+	 * @param other the other rectangle
+	 * @return true when `other` inside
+	 */
 	public function contains(other: Rect): Bool {
 		return (left <= other.left) && (other.right <= right)
 			&& (top <= other.top) && (other.bottom <= bottom);
 	}
-
+	/**
+	 * Returns `true` if this rectangle and `other` have the same co-ordinates
+	 * and dimensions
+	 * @param other the rectangle to compare
+	 * @param maxDiff maximum difference between equal rect co-ordinates / dimensions
+	 * @return true when same
+	 */
 	public inline function equals(other: Rect, maxDiff: Float = 0.01): Bool 
 		return (Math.abs(x - other.x) < maxDiff) &&
 			(Math.abs(y - other.y) < maxDiff) &&
@@ -116,5 +135,5 @@ class Rect implements IPoolable {
 			(Math.abs(height - other.height) < maxDiff);
 
 	public inline function toString():String
-		return '${x}, ${y} ${width} x ${height}';
+		return '${x}, ${y} - ${width} x ${height}';
 }
